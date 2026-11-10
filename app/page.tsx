@@ -66,7 +66,7 @@ export default function Home(){
  function palmDown(e:React.PointerEvent<HTMLSpanElement>,index:number){
   e.preventDefault();e.stopPropagation();
   palmGesture.current={id:e.pointerId,index,lastX:e.clientX,direction:0,swings:0,triggered:false};
-  setShakingPalm(index);e.currentTarget.setPointerCapture(e.pointerId);
+  setShakingPalm(index);if(mode==="online")onlineSend("palm_start",{index});e.currentTarget.setPointerCapture(e.pointerId);
  }
  function palmMove(e:React.PointerEvent<HTMLSpanElement>){
   const g=palmGesture.current;if(!g||g.id!==e.pointerId)return;
@@ -78,9 +78,10 @@ export default function Home(){
   if(g.swings>=4&&!g.triggered){
    g.triggered=true;
    setCoconuts(old=>old.map((n,i)=>i===g.index?Math.min(n+2,8):n));
+   if(mode==="online")onlineSend("palm_drop",{index:g.index});
   }
  }
- function palmUp(){palmGesture.current=null;setShakingPalm(null)}
+ function palmUp(){const index=palmGesture.current?.index;if(index!==undefined&&mode==="online")onlineSend("palm_stop",{index});palmGesture.current=null;setShakingPalm(null)}
 
  const [mode,setMode]=useState<Mode|null>(null);
  const [room,setRoom]=useState("");
@@ -101,9 +102,13 @@ export default function Home(){
   ws.onmessage=event=>{try{
    const data=JSON.parse(event.data);
    if(data.type==="error"){setRoomError(data.message);return}
+   if(data.type==="palm_start"){if(Number.isInteger(data.index))setShakingPalm(data.index);return}
+   if(data.type==="palm_stop"){setShakingPalm(null);return}
+   if(data.type==="palm_drop"){if(Array.isArray(data.coconuts))setCoconuts(data.coconuts);return}
    if(data.type==="state"){
     setRoomError("");setRoom(data.room);setOnlineSeat(data.seat);setOnlinePlayers(data.players);
     setPos(data.state.pos);setTurn(data.state.turn);setDie(data.state.die);
+    if(Array.isArray(data.state.coconuts))setCoconuts(data.state.coconuts);
     setStepsLeft(data.state.stepsLeft);setWon(data.state.won);setMessage(data.state.message);if(data.state.board)setBoard(data.state.board);setChallenge(data.state.challenge??null);if(data.state.settings)setSettings(data.state.settings);if(data.state.winner!==null&&data.state.winner!==undefined&&!won)setConfettiKey(n=>n+1);setWinner(data.state.winner??null);
    }
   }catch{}};
