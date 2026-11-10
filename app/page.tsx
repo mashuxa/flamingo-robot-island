@@ -176,7 +176,7 @@ export default function Home(){
  useEffect(()=>{if(loaded)localStorage.setItem(SETTINGS_KEY,JSON.stringify(settings))},[settings,loaded]);
  useEffect(()=>()=>{botTimers.current.forEach(clearTimeout)},[]);
  function scheduleBot(fn:()=>void,delay:number){const t=setTimeout(fn,delay);botTimers.current.push(t)}
- function selectMode(next:Mode){reset();if(next==="online"){setMyAvatar("flamingo");setAvatarChosen(false)}setMode(next);setMessage("Брось кубик, чтобы начать приключение!")}
+ function selectMode(next:Mode){reset();if(next==="online"){setMyAvatar("flamingo");setAvatarChosen(false)}else{setPlayers([{name:"Фламинго",avatar:"flamingo"},{name:"Робот",avatar:"robot"}])}setMode(next);setMessage("Брось кубик, чтобы начать приключение!")}
  function clearProgress(){socketRef.current?.close();setOnlineSeat(null);setOnlinePlayers(0);botTimers.current.forEach(clearTimeout);botTimers.current=[];setMode(null);setRoom("");setBotBusy(false);botStepPending.current=false;reset();try{localStorage.removeItem(STORAGE)}catch{}}
  
  const [heroDrag,setHeroDrag]=useState<{player:number,x:number,y:number}|null>(null);
