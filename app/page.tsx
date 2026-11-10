@@ -86,7 +86,7 @@ export default function Home(){
    if(data.type==="state"){
     setRoomError("");setRoom(data.room);setOnlineSeat(data.seat);setOnlinePlayers(data.players);
     setPos(data.state.pos);setTurn(data.state.turn);setDie(data.state.die);
-    setStepsLeft(data.state.stepsLeft);setWon(data.state.won);setMessage(data.state.message);if(data.state.board)setBoard(data.state.board);setChallenge(data.state.challenge??null);if(data.state.settings)setSettings(data.state.settings);setWinner(previous=>{if(data.state.winner!==null&&data.state.winner!==undefined&&previous!==data.state.winner)setConfettiKey(n=>n+1);return data.state.winner??null});
+    setStepsLeft(data.state.stepsLeft);setWon(data.state.won);setMessage(data.state.message);if(data.state.board)setBoard(data.state.board);setChallenge(data.state.challenge??null);if(data.state.settings)setSettings(data.state.settings);if(data.state.winner!==null&&data.state.winner!==undefined&&!won)setConfettiKey(n=>n+1);setWinner(data.state.winner??null);
    }
   }catch{}};
   ws.onerror=()=>setRoomError("Не удалось подключиться к серверу");
