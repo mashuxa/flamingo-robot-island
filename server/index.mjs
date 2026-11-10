@@ -48,6 +48,11 @@ function fresh(settings=defaults){const indexes=Array.from({length:60},(_,i)=>i)
 function code(){let n;do{n=String(randomInt(100000,1000000))}while(rooms.has(n));return n}
 wss.on("connection",ws=>{
  ws.on("message",raw=>{let data;try{data=JSON.parse(raw)}catch{return}
+  if(data.type==="preview"){
+   expireRooms();
+   const room=rooms.get(String(data.room||""));
+   return send(ws,{type:"room_preview",room:String(data.room||""),players:room?.state?.players||[null,null],exists:!!room,full:!!room&&room.clients.size>=2});
+  }
   if(data.type==="create"||data.type==="join"){
    const number=data.type==="create"?code():String(data.room||"");
    if(data.type==="join"&&!/^\d{6}$/.test(number))return send(ws,{type:"error",message:"Номер комнаты — 6 цифр"});
