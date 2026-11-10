@@ -47,6 +47,13 @@ export default function Home(){
  const [avatarChosen,setAvatarChosen]=useState(false);
  const [roomPreview,setRoomPreview]=useState<{room:string;players:(PlayerInfo|null)[];exists:boolean;full:boolean}|null>(null);
  useEffect(()=>{
+  if(roomPreview?.room!==room||!roomPreview.exists)return;
+  if(roomPreview.players.some(p=>p?.avatar===myAvatar)){
+   const free=avatarOptions.find(a=>!roomPreview.players.some(p=>p?.avatar===a.id));
+   if(free){setMyAvatar(free.id);setAvatarChosen(true)}
+  }
+ },[roomPreview,room,myAvatar]);
+ useEffect(()=>{
   if(mode!=="online"||room.length!==6||!wsUrl){setRoomPreview(null);return}
   const ws=new WebSocket(wsUrl);
   ws.onopen=()=>ws.send(JSON.stringify({type:"preview",room}));
