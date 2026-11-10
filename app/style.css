@@ -79,3 +79,11 @@
   100%{transform:translateY(0) scale(1)}
 }
 .hero-drag-overlay{z-index:10000}
+
+/* Shake each palm left and right to drop coconuts */
+.palm-interactive{pointer-events:auto;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none;transform-origin:50% 90%;line-height:1}
+.palm-interactive:active{cursor:grabbing}
+.palm-shaking{animation:palm-wiggle .16s ease-in-out infinite alternate}
+@keyframes palm-wiggle{from{rotate:-9deg}to{rotate:9deg}}
+.coconut{position:absolute;font-size:clamp(18px,2.4vw,34px);line-height:1;pointer-events:none;filter:drop-shadow(1px 3px 2px #5545);animation:coconut-drop .85s cubic-bezier(.2,.65,.3,1) both}
+@keyframes coconut-drop{0%{opacity:0;transform:translateY(-65px) rotate(-35deg) scale(.65)}55%{opacity:1;transform:translateY(2px) rotate(20deg) scale(1.1)}75%{transform:translateY(-13px) rotate(-10deg)}100%{opacity:1;transform:translateY(0) rotate(0)}}
