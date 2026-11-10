@@ -1,6 +1,7 @@
 import {WebSocketServer,WebSocket} from "ws";
 import {randomInt} from "node:crypto";
-import {readFileSync} from "node:fs";
+import {readFileSync,writeFileSync,renameSync,mkdirSync} from "node:fs";
+import {dirname} from "node:path";
 const words=JSON.parse(readFileSync(new URL("../data/words.json",import.meta.url),"utf8"));
 const defaults={language:"ru",maxLetters:4,addition:true,subtraction:true,mathMax:10};
 const pick=arr=>arr[randomInt(arr.length)];
@@ -8,8 +9,39 @@ function challenge(type,settings){const groups=words[settings.language]||words.r
 const port=Number(process.env.PORT||8080);
 const wss=new WebSocketServer({port});
 const rooms=new Map();
+const ROOM_TTL_MS=24*60*60*1000;
+const ROOM_STORE=process.env.ROOM_STORE_PATH||"./data/rooms.json";
+function persistRooms(){
+ try{
+  mkdirSync(dirname(ROOM_STORE),{recursive:true});
+  const snapshot=[...rooms.values()].map(room=>({code:room.code,createdAt:room.createdAt,state:room.state}));
+  writeFileSync(ROOM_STORE+".tmp",JSON.stringify(snapshot));
+  renameSync(ROOM_STORE+".tmp",ROOM_STORE);
+ }catch(error){console.error("Failed to persist rooms",error)}
+}
+function expireRooms(){
+ const now=Date.now();let changed=false;
+ for(const [id,room] of rooms){
+  if(now-room.createdAt>=ROOM_TTL_MS){
+   for(const ws of room.clients){send(ws,{type:"error",message:"Срок действия комнаты истёк (24 часа)"});ws.room=null;ws.close(1000,"Room expired")}
+   rooms.delete(id);changed=true;
+  }
+ }
+ if(changed)persistRooms();
+}
+try{
+ const saved=JSON.parse(readFileSync(ROOM_STORE,"utf8"));
+ for(const item of saved){
+  if(item&&/^\\d{6}$/.test(item.code)&&Number.isFinite(item.createdAt)&&Date.now()-item.createdAt<ROOM_TTL_MS&&item.createdAt<=Date.now()&&item.state){
+   rooms.set(item.code,{code:item.code,createdAt:item.createdAt,clients:new Set(),state:item.state});
+  }
+ }
+}catch(error){if(error.code!=="ENOENT")console.error("Failed to load saved rooms",error)}
+expireRooms();
+const cleanupInterval=setInterval(expireRooms,60*1000);
+cleanupInterval.unref();
 const send=(ws,obj)=>{if(ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(obj))};
-function publish(room){for(const ws of room.clients)send(ws,{type:"state",room:room.code,players:room.clients.size,state:room.state,seat:ws.seat})}
+function publish(room){persistRooms();for(const ws of room.clients)send(ws,{type:"state",room:room.code,players:room.clients.size,state:room.state,seat:ws.seat})}
 function fresh(settings=defaults){const indexes=Array.from({length:60},(_,i)=>i);for(let i=indexes.length-1;i>0;i--){const j=randomInt(i+1);[indexes[i],indexes[j]]=[indexes[j],indexes[i]]}const board={};indexes.slice(0,27).forEach((n,i)=>board[n]=["letter","word","math"][i%3]);return {pos:[-1,-1],turn:0,die:null,stepsLeft:0,won:false,winner:null,board,challenge:null,settings,message:"Брось кубик!"}}
 function code(){let n;do{n=String(randomInt(100000,1000000))}while(rooms.has(n));return n}
 wss.on("connection",ws=>{
@@ -17,8 +49,9 @@ wss.on("connection",ws=>{
   if(data.type==="create"||data.type==="join"){
    const number=data.type==="create"?code():String(data.room||"");
    if(data.type==="join"&&!/^\d{6}$/.test(number))return send(ws,{type:"error",message:"Номер комнаты — 6 цифр"});
+   expireRooms();
    let room=rooms.get(number);
-   if(!room){if(data.type==="join")return send(ws,{type:"error",message:"Комната не найдена"});room={code:number,clients:new Set(),state:fresh({...defaults,...data.settings})};rooms.set(number,room)}
+   if(!room){if(data.type==="join")return send(ws,{type:"error",message:"Комната не найдена"});room={code:number,createdAt:Date.now(),clients:new Set(),state:fresh({...defaults,...data.settings})};rooms.set(number,room);persistRooms()}
    if(room.clients.size>=2)return send(ws,{type:"error",message:"Комната заполнена"});
    if(ws.room)return send(ws,{type:"error",message:"Вы уже в комнате"});
    ws.room=room;ws.seat=[0,1].find(seat=>![...room.clients].some(client=>client.seat===seat));room.clients.add(ws);publish(room);return;
@@ -42,6 +75,6 @@ wss.on("connection",ws=>{
   if(data.type==="skip"&&state.turn===ws.seat&&state.challenge){state.challenge=null;state.turn=1-state.turn;state.message="Задание пропущено. Ход другого игрока.";publish(room)}
   if(data.type==="reset"&&ws.seat===0){room.state=fresh(state.settings);publish(room)}
  });
- ws.on("close",()=>{const room=ws.room;if(!room)return;room.clients.delete(ws);if(!room.clients.size)rooms.delete(room.code);else publish(room)});
+ ws.on("close",()=>{const room=ws.room;if(!room)return;room.clients.delete(ws);publish(room)});
 });
 console.log("Game websocket server listening on",port);
