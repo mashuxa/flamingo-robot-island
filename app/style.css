@@ -36,3 +36,18 @@
 .hero{font-size:clamp(26px,3vw,42px)}
 .hero-robot{left:30%}
 @media(max-width:800px){.stone{width:clamp(18px,4vw,27px);height:clamp(18px,4vw,27px)}.stone-label{font-size:9px}.hero{font-size:28px}.start-zone{font-size:9px}}
+
+/* Mode selection and persistence controls */
+.mode-screen,.game-loading{min-height:100dvh;display:grid;place-items:center;padding:24px;background:linear-gradient(145deg,#5ad5df,#ffdfa4);font-family:system-ui}
+.mode-dialog{width:min(100%,500px);background:#fffdf4;border-radius:28px;padding:28px;box-shadow:0 20px 60px #14536a55;text-align:center}
+.mode-dialog h1{margin:0 0 8px;color:#f06499}.mode-options{display:grid;gap:12px;margin:22px 0}
+.mode-options button{background:#f5fcff;border:2px solid #c8eef2;border-radius:16px;padding:15px;text-align:left;font-weight:800;cursor:pointer;color:#244b60}
+.mode-options button small{display:block;font-weight:400;margin-top:4px}.mode-options button:hover{border-color:#f06499}
+.room-form{display:grid;gap:12px}.room-form input{display:block;width:100%;padding:12px;border-radius:12px;border:1px solid #9acbd3;margin-top:8px}
+.room-form button,.clear-save{border:0;border-radius:12px;background:#f36f9d;color:white;padding:12px;cursor:pointer}
+.clear-save{background:#e9eef1;color:#46616c;font-size:12px}
+.panel-actions{flex-wrap:wrap}.panel-actions button{min-width:45%}
+.dice-overlay{position:fixed;z-index:9999;width:96px;height:96px;display:grid;place-items:center;transform:translate(-50%,-50%) scale(1.35);pointer-events:none;perspective:700px;filter:drop-shadow(0 18px 12px #2357)}
+.dice-overlay-flying{animation:dice-land .95s ease-in-out forwards}
+@keyframes dice-land{0%{transform:translate(-50%,-150%) scale(1.5)}55%{transform:translate(-50%,20%) scale(.75)}100%{transform:translate(-50%,-50%) scale(.65)}}
+.die:has(+ .dice-hint) .die-float{pointer-events:none}
