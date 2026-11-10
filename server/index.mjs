@@ -57,8 +57,9 @@ wss.on("connection",ws=>{
    if(room.clients.size>=2)return send(ws,{type:"error",message:"Комната заполнена"});
    if(!Array.isArray(room.state.players))room.state.players=[null,null];
    const seat=[0,1].find(n=>![...room.clients].some(client=>client.seat===n));
-   const requested=AVATARS.includes(data.avatar)?data.avatar:(seat===0?"flamingo":"robot");
+   let requested=AVATARS.includes(data.avatar)?data.avatar:(seat===0?"flamingo":"robot");
    const other=room.state.players[1-seat]?.avatar;
+   if(other===requested&&data.avatarAuto)requested=AVATARS.find(a=>a===(seat===0?"flamingo":"robot")&&a!==other)||AVATARS.find(a=>a!==other);
    if(other===requested)return send(ws,{type:"error",message:"Этот персонаж уже занят. Выбери другого."});
    if(room.state.players[seat]?.avatar&&room.state.players[seat].avatar!==requested&&room.state.players[1-seat]?.avatar===requested)return send(ws,{type:"error",message:"Персонаж занят"});
    room.state.players[seat]={name:safeName(data.name),avatar:requested};
