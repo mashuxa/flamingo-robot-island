@@ -181,3 +181,6 @@
 .challenge-title{font-weight:800;color:#9d5a21}
 .challenge-skip{background:#8492a6!important;font-size:15px!important}
 @media(max-width:800px){.stone{width:clamp(30px,5vw,43px);height:clamp(30px,5vw,43px)}.stone-task-icon{width:20px;height:20px;right:-10px;top:-12px;font-size:12px}}
+
+.restart-game-button{display:block;width:100%;margin-top:18px;padding:15px 20px;border:0;border-radius:15px;background:#e85f93;color:white;font-size:17px;font-weight:850;cursor:pointer;box-shadow:0 4px 0 #ad3b6b}
+.restart-game-button:active{transform:translateY(2px);box-shadow:0 2px 0 #ad3b6b}
