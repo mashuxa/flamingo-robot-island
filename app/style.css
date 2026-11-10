@@ -191,3 +191,26 @@
 
 /* Children see and enter all word-task letters in uppercase. */
 .challenge-modal .challenge input:not([inputmode="numeric"]){text-transform:uppercase}
+
+/* Uniform selectable character icons in the setup and on the board. */
+.avatar-figure{display:inline-flex;align-items:center;justify-content:center;width:1em;height:1em;font-size:inherit;line-height:1;vertical-align:middle;flex:none}
+.avatar-figure .robot-figure{height:100%;width:65%;object-fit:contain}
+.player-config{display:grid;gap:12px;margin:14px 0}
+.player-config-row{padding:12px;border:2px solid #f1cba9;border-radius:16px;background:#fff9ee}
+.player-config-row label{display:flex;gap:8px;align-items:center;font-weight:800}
+.player-config-row input,.room-form input{min-width:0;max-width:100%;padding:9px;border:1px solid #e9b994;border-radius:10px}
+.avatar-picker{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.avatar-picker button{display:grid;place-items:center;width:55px;height:62px;padding:5px;border:2px solid #e9cba8;border-radius:12px;background:white;cursor:pointer}
+.avatar-picker button.selected,.avatar-picker button[aria-pressed="true"]{border-color:#e75d9d;background:#ffdfed;box-shadow:0 0 0 2px #e75d9d44}
+.avatar-picker .avatar-figure{font-size:43px}
+.online-match{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin:8px 0;font-weight:800}
+.online-match span{display:inline-flex;align-items:center;gap:6px}
+.online-match .avatar-figure{font-size:28px}
+.turn-avatar .avatar-figure{font-size:42px}
+.score .avatar-figure{font-size:30px}
+.score>div{display:flex;align-items:center;gap:5px;flex-wrap:wrap}
+.hero-character .avatar-figure{font-size:var(--piece-height);height:var(--piece-height);width:var(--piece-height)}
+.hero-character.hero-robot .avatar-figure{width:var(--piece-height);height:var(--piece-height)}
+.hero-character.hero-robot .robot-figure{width:62%;height:100%}
+.bot-moving-piece .avatar-figure{font-size:var(--piece-height);width:var(--piece-height);height:var(--piece-height)}
+@media(max-width:800px){.avatar-picker button{width:45px;height:52px}.avatar-picker .avatar-figure{font-size:36px}}
