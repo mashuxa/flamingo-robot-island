@@ -158,3 +158,13 @@
 .hero-start.hero-robot{left:4%;top:23%;bottom:auto;transform:translate(-50%,-100%)}
 .finish-hero.hero-flamingo,.finish-hero.hero-robot{transform:translate(-50%,-100%);top:85%;bottom:auto}
 @media(max-width:800px){:root{--piece-height:58px}}
+
+/* Both pawns stand INSIDE the START tile, side by side, not underneath it. */
+.hero-start.hero-flamingo,.hero-start.hero-robot{top:23%;bottom:auto;z-index:7}
+.hero-start.hero-flamingo{left:calc(4% + 20px);transform:translate(-50%,-50%) scale(.68)}
+.hero-start.hero-robot{left:calc(4% - 20px);transform:translate(-50%,-50%) scale(.68)}
+.start-big{z-index:3}
+@media(max-width:800px){
+ .hero-start.hero-flamingo{left:calc(4% + 13px);transform:translate(-50%,-50%) scale(.55)}
+ .hero-start.hero-robot{left:calc(4% - 13px);transform:translate(-50%,-50%) scale(.55)}
+}
