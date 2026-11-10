@@ -26,10 +26,10 @@ wss.on("connection",ws=>{
   }
   if(data.type==="move"){
    if(state.turn!==ws.seat||state.die===null||state.won)return;
-   const target=Math.min(59,state.pos[ws.seat]+state.stepsLeft);
+   const target=Math.min(60,state.pos[ws.seat]+state.stepsLeft);
    if(data.target!==target)return send(ws,{type:"error",message:"Неверная клетка"});
    state.pos[ws.seat]=target;state.stepsLeft=0;state.die=null;
-   if(target===59){state.won=true;state.winner=ws.seat;state.message="Победа!"}
+   if(target===60){state.won=true;state.winner=ws.seat;state.message="Победа!"}
    else{state.turn=1-state.turn;state.message="Ход другого игрока"}
    publish(room);
   }
