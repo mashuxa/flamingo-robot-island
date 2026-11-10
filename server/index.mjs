@@ -5,7 +5,7 @@ const wss=new WebSocketServer({port});
 const rooms=new Map();
 const send=(ws,obj)=>{if(ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(obj))};
 function publish(room){for(const ws of room.clients)send(ws,{type:"state",room:room.code,players:room.clients.size,state:room.state,seat:ws.seat})}
-function fresh(){return {pos:[-1,-1],turn:0,die:null,stepsLeft:0,won:false,message:"Брось кубик!"}}
+function fresh(){const indexes=Array.from({length:59},(_,i)=>i);for(let i=indexes.length-1;i>0;i--){const j=randomInt(i+1);[indexes[i],indexes[j]]=[indexes[j],indexes[i]]}const board={};indexes.slice(0,27).forEach((n,i)=>board[n]=["letter","word","math"][i%3]);return {pos:[-1,-1],turn:0,die:null,stepsLeft:0,won:false,winner:null,board,message:"Брось кубик!"}}
 function code(){let n;do{n=String(randomInt(100000,1000000))}while(rooms.has(n));return n}
 wss.on("connection",ws=>{
  ws.on("message",raw=>{let data;try{data=JSON.parse(raw)}catch{return}
@@ -29,7 +29,7 @@ wss.on("connection",ws=>{
    const target=Math.min(59,state.pos[ws.seat]+state.stepsLeft);
    if(data.target!==target)return send(ws,{type:"error",message:"Неверная клетка"});
    state.pos[ws.seat]=target;state.stepsLeft=0;state.die=null;
-   if(target===59){state.won=true;state.message="Победа!"}
+   if(target===59){state.won=true;state.winner=ws.seat;state.message="Победа!"}
    else{state.turn=1-state.turn;state.message="Ход другого игрока"}
    publish(room);
   }
