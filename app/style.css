@@ -126,3 +126,13 @@
 .confetti{position:absolute;inset:0;pointer-events:none;overflow:hidden}
 .confetti i{position:absolute;top:-18px;width:8px;height:14px;opacity:0;animation:confetti-fall 3s linear infinite}
 @keyframes confetti-fall{0%{opacity:1;transform:translateY(-20px) rotate(0)}100%{opacity:1;transform:translateY(400px) rotate(850deg)}}
+
+/* Board is a game surface: never select labels or numbers while dragging. */
+.game,.mode-screen,.game-loading,.game *,.mode-screen *{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.game input,.game textarea,.mode-screen input,.mode-screen textarea{-webkit-user-select:text;user-select:text}
+/* Transparent board overlay must not swallow gestures intended for palm trees. */
+.path{pointer-events:none}
+.stone,.stone .hero,.hero-start{pointer-events:auto}
+.island{pointer-events:none}
+.palm-interactive{pointer-events:auto;z-index:9;touch-action:none;cursor:grab;display:inline-block;position:absolute}
+.palm-interactive .coconut{position:absolute;z-index:10}
