@@ -93,3 +93,9 @@
 .robot-figure{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(1px 5px 3px #2348)}
 .hero-drag-overlay .robot-figure{width:66px;height:105px}
 @media(max-width:800px){.hero-robot{width:42px;height:68px}}
+
+/* Robot moves across the board, not just jumping in place */
+.bot-moving-piece{position:absolute;z-index:20;width:52px;height:84px;transform:translate(-50%,-68%);pointer-events:none;transition:none;filter:drop-shadow(0 8px 6px #163b5b66)}
+.bot-moving-piece-active{transition:left 1.25s linear,top 1.25s linear}
+.bot-moving-piece .robot-figure{animation:robot-walk .45s ease-in-out infinite alternate}
+@keyframes robot-walk{from{transform:translateY(-12px) rotate(-5deg)}to{transform:translateY(1px) rotate(5deg)}}
