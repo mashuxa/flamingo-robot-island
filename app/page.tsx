@@ -46,21 +46,6 @@ export default function Home(){
  const [myAvatar,setMyAvatar]=useState<Avatar>("flamingo");
  const [avatarChosen,setAvatarChosen]=useState(false);
  const [roomPreview,setRoomPreview]=useState<{room:string;players:(PlayerInfo|null)[];exists:boolean;full:boolean}|null>(null);
- useEffect(()=>{
-  if(roomPreview?.room!==room||!roomPreview.exists)return;
-  if(roomPreview.players.some(p=>p?.avatar===myAvatar)){
-   const free=avatarOptions.find(a=>!roomPreview.players.some(p=>p?.avatar===a.id));
-   if(free){setMyAvatar(free.id);setAvatarChosen(true)}
-  }
- },[roomPreview,room,myAvatar]);
- useEffect(()=>{
-  if(mode!=="online"||room.length!==6||!wsUrl){setRoomPreview(null);return}
-  const ws=new WebSocket(wsUrl);
-  ws.onopen=()=>ws.send(JSON.stringify({type:"preview",room}));
-  ws.onmessage=e=>{try{const d=JSON.parse(e.data);if(d.type==="room_preview"){setRoomPreview(d);ws.close()}}catch{}};
-  ws.onerror=()=>setRoomPreview(null);
-  return ()=>ws.close();
- },[room,mode,wsUrl]);
  function changeAvatar(index:number,avatar:Avatar){setPlayers(old=>old.map((p,i)=>i===index?{...p,avatar}:i===1-index&&p.avatar===avatar?{...p,avatar:old[index].avatar}:p))}
 
  const [board,setBoard]=useState<Record<number,"letter"|"word"|"math">>({});
@@ -119,6 +104,22 @@ export default function Home(){
  const [botVisual,setBotVisual]=useState<{from:number,to:number}|null>(null);
  const [botTravel,setBotTravel]=useState(false);
  const wsUrl=process.env.NEXT_PUBLIC_GAME_WS_URL;
+ useEffect(()=>{
+  if(roomPreview?.room!==room||!roomPreview.exists)return;
+  if(roomPreview.players.some(p=>p?.avatar===myAvatar)){
+   const free=avatarOptions.find(a=>!roomPreview.players.some(p=>p?.avatar===a.id));
+   if(free){setMyAvatar(free.id);setAvatarChosen(true)}
+  }
+ },[roomPreview,room,myAvatar]);
+ useEffect(()=>{
+  if(mode!=="online"||room.length!==6||!wsUrl){setRoomPreview(null);return}
+  const ws=new WebSocket(wsUrl);
+  ws.onopen=()=>ws.send(JSON.stringify({type:"preview",room}));
+  ws.onmessage=e=>{try{const d=JSON.parse(e.data);if(d.type==="room_preview"){setRoomPreview(d);ws.close()}}catch{}};
+  ws.onerror=()=>setRoomPreview(null);
+  return ()=>ws.close();
+ },[room,mode,wsUrl]);
+
  function connectRoom(action:"create"|"join"){
   if(!wsUrl){setRoomError("Сервер комнат ещё не подключён");return}
   if(action==="join"&&!/^\d{6}$/.test(room)){setRoomError("Введи 6 цифр");return}
