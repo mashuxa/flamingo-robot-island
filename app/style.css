@@ -67,3 +67,15 @@
 .stone.suggested::after{content:"";position:absolute;inset:-6px;border:3px solid #ffd13b;border-radius:50%;pointer-events:none;animation:landing-ring 1.5s ease-out infinite}
 @keyframes landing-ping{0%,100%{box-shadow:0 3px 0 #b8945f,0 0 0 0 #ffd43b99;transform:translate(-50%,-50%) scale(1)}50%{box-shadow:0 3px 0 #b8945f,0 0 0 9px #ffd43b22;transform:translate(-50%,-50%) scale(1.16)}}
 @keyframes landing-ring{0%{opacity:.9;transform:scale(.75)}85%,100%{opacity:0;transform:scale(1.8)}}
+
+/* Visible, deliberate hop on each robot step */
+.stone .hero-robot{display:inline-block;animation:robot-hop 1.02s cubic-bezier(.22,.65,.3,1) both;transform-origin:bottom center}
+@keyframes robot-hop{
+  0%{transform:translateY(0) scale(1,.88)}
+  18%{transform:translateY(-22px) scale(.94,1.12)}
+  42%{transform:translateY(-37px) scale(1.06,1.08)}
+  72%{transform:translateY(-12px) scale(1,1)}
+  88%{transform:translateY(0) scale(1.14,.82)}
+  100%{transform:translateY(0) scale(1)}
+}
+.hero-drag-overlay{z-index:10000}
