@@ -16,7 +16,7 @@ wss.on("connection",ws=>{
    if(!room){if(data.type==="join")return send(ws,{type:"error",message:"Комната не найдена"});room={code:number,clients:new Set(),state:fresh()};rooms.set(number,room)}
    if(room.clients.size>=2)return send(ws,{type:"error",message:"Комната заполнена"});
    if(ws.room)return send(ws,{type:"error",message:"Вы уже в комнате"});
-   ws.room=room;ws.seat=room.clients.size;room.clients.add(ws);publish(room);return;
+   ws.room=room;ws.seat=[0,1].find(seat=>![...room.clients].some(client=>client.seat===seat));room.clients.add(ws);publish(room);return;
   }
   const room=ws.room;if(!room)return;
   const state=room.state;if(room.clients.size<2)return send(ws,{type:"error",message:"Ждём второго игрока"});
