@@ -38,7 +38,8 @@ wss.on("connection",ws=>{
    else if(state.board[target]){state.challenge=challenge(state.board[target],state.settings);state.message="Выполни задание!"}else{state.turn=1-state.turn;state.message="Ход другого игрока"}
    publish(room);
   }
-  if(data.type==="answer"&&state.turn===ws.seat&&state.challenge){if(String(data.answer||"").trim().toLocaleLowerCase()===state.challenge.answer.toLocaleLowerCase()){state.challenge=null;state.turn=1-state.turn;state.message="Правильно! Ход другого игрока";publish(room)}else send(ws,{type:"error",message:"Попробуй ещё раз!"})}
+  if(data.type==="answer"&&state.turn===ws.seat&&state.challenge){if(String(data.answer||"").trim().toLocaleLowerCase()===state.challenge.answer.toLocaleLowerCase()){state.challenge=null;state.message="Молодец! Ты правильно решил задачу и получаешь дополнительный ход. Ходи ещё раз!";publish(room)}else send(ws,{type:"error",message:"Попробуй ещё раз!"})}
+  if(data.type==="skip"&&state.turn===ws.seat&&state.challenge){state.challenge=null;state.turn=1-state.turn;state.message="Задание пропущено. Ход другого игрока.";publish(room)}
   if(data.type==="reset"&&ws.seat===0){room.state=fresh(state.settings);publish(room)}
  });
  ws.on("close",()=>{const room=ws.room;if(!room)return;room.clients.delete(ws);if(!room.clients.size)rooms.delete(room.code);else publish(room)});
