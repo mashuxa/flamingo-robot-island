@@ -42,7 +42,7 @@ const cleanupInterval=setInterval(expireRooms,60*1000);
 cleanupInterval.unref();
 const send=(ws,obj)=>{if(ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(obj))};
 function publish(room){persistRooms();for(const ws of room.clients)send(ws,{type:"state",room:room.code,players:room.clients.size,state:room.state,seat:ws.seat})}
-function fresh(settings=defaults){const indexes=Array.from({length:60},(_,i)=>i);for(let i=indexes.length-1;i>0;i--){const j=randomInt(i+1);[indexes[i],indexes[j]]=[indexes[j],indexes[i]]}const board={};indexes.slice(0,27).forEach((n,i)=>board[n]=["letter","word","math"][i%3]);return {pos:[-1,-1],turn:0,die:null,stepsLeft:0,won:false,winner:null,board,challenge:null,settings,message:"Брось кубик!"}}
+function fresh(settings=defaults){const indexes=Array.from({length:60},(_,i)=>i);for(let i=indexes.length-1;i>0;i--){const j=randomInt(i+1);[indexes[i],indexes[j]]=[indexes[j],indexes[i]]}const board={};indexes.slice(0,27).forEach((n,i)=>board[n]=["letter","word","math"][i%3]);return {pos:[-1,-1],turn:0,die:null,stepsLeft:0,won:false,winner:null,board,challenge:null,coconuts:[0,0,0],settings,message:"Брось кубик!"}}
 function code(){let n;do{n=String(randomInt(100000,1000000))}while(rooms.has(n));return n}
 wss.on("connection",ws=>{
  ws.on("message",raw=>{let data;try{data=JSON.parse(raw)}catch{return}
@@ -57,7 +57,21 @@ wss.on("connection",ws=>{
    ws.room=room;ws.seat=[0,1].find(seat=>![...room.clients].some(client=>client.seat===seat));room.clients.add(ws);publish(room);return;
   }
   const room=ws.room;if(!room)return;
-  const state=room.state;if(room.clients.size<2)return send(ws,{type:"error",message:"Ждём второго игрока"});
+  const state=room.state;
+  if(["palm_start","palm_drop","palm_stop"].includes(data.type)){
+   const index=data.index;
+   if(!Number.isInteger(index)||index<0||index>2)return;
+   if(!Array.isArray(state.coconuts))state.coconuts=[0,0,0];
+   if(data.type==="palm_drop"){
+    state.coconuts[index]=Math.min(8,state.coconuts[index]+2);
+    persistRooms();
+   }
+   for(const peer of room.clients){
+    if(peer!==ws)send(peer,{type:data.type,index,coconuts:state.coconuts});
+   }
+   return;
+  }
+  if(room.clients.size<2)return send(ws,{type:"error",message:"Ждём второго игрока"});
   if(data.type==="roll"){
    if(state.turn!==ws.seat||state.die!==null||state.won||state.challenge)return;
    state.die=randomInt(1,7);state.stepsLeft=state.die;state.message="Выпало "+state.die;publish(room);
