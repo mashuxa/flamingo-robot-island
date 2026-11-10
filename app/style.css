@@ -51,3 +51,13 @@
 .dice-overlay-flying{animation:dice-land .95s ease-in-out forwards}
 @keyframes dice-land{0%{transform:translate(-50%,-150%) scale(1.5)}55%{transform:translate(-50%,20%) scale(.75)}100%{transform:translate(-50%,-50%) scale(.65)}}
 .die:has(+ .dice-hint) .die-float{pointer-events:none}
+
+/* Only one visible die while dragged or thrown */
+.die-in-flight .die-float{visibility:hidden}
+.dice-overlay{isolation:isolate}
+.dice-overlay-flying{animation:dice-return .95s cubic-bezier(.22,.8,.25,1) forwards}
+@keyframes dice-return{
+  0%{transform:translate(-50%,-50%) scale(1.45) rotate(-12deg)}
+  45%{transform:translate(-50%,-90%) scale(1.25) rotate(24deg)}
+  100%{transform:translate(calc(-50% + var(--dice-return-x)),calc(-50% + var(--dice-return-y))) scale(.8) rotate(0)}
+}
