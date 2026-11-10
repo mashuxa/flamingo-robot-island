@@ -136,3 +136,16 @@
 .island{pointer-events:none}
 .palm-interactive{pointer-events:auto;z-index:9;touch-action:none;cursor:grab;display:inline-block;position:absolute}
 .palm-interactive .coconut{position:absolute;z-index:10}
+
+/* Separate endpoints, outside the sixty numbered cells. */
+.start-finish-zone{position:absolute;z-index:3;width:clamp(58px,7vw,108px);height:clamp(52px,6vw,94px);display:flex;align-items:center;justify-content:center;border:5px solid #fff8d7;border-radius:25px;font-size:clamp(12px,1.4vw,19px);font-weight:1000;box-shadow:0 8px 0 #b78750,0 14px 20px #513b3566;color:#704623;transform:translate(-50%,-50%);text-align:center}
+.start-big{background:linear-gradient(135deg,#aef1ce,#60c7a4);pointer-events:none}
+.finish-big{background:linear-gradient(135deg,#ffe49b,#f8a3c6);cursor:pointer;pointer-events:auto;touch-action:manipulation}
+.finish-big:hover{filter:brightness(1.06)}
+.finish-hero{z-index:8;pointer-events:none;top:auto;bottom:auto;transform:translate(-50%,-85%)}
+.finish-hero.hero-robot{width:52px;height:84px}
+.board-confetti{position:fixed;inset:0;z-index:200;pointer-events:none;overflow:hidden}
+.board-confetti i{position:absolute;top:-20px;width:10px;height:17px;opacity:0;animation:board-confetti-drop 3.8s cubic-bezier(.3,.4,.6,1) forwards}
+@keyframes board-confetti-drop{0%{opacity:1;transform:translate(0,-25px) rotate(0)}90%{opacity:1}100%{opacity:0;transform:translate(90px,110vh) rotate(1050deg)}}
+.stone .hero-flamingo{pointer-events:auto}
+@media(max-width:800px){.start-finish-zone{width:55px;height:49px;border-width:3px;font-size:10px}.finish-hero.hero-robot{width:42px;height:68px}}
