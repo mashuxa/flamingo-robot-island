@@ -188,3 +188,6 @@
 :root{--start-piece-offset:25px}
 .hero-start.hero-flamingo,.hero-start.hero-robot{transform:translate(-50%,-50%) scale(.64);z-index:7}
 @media(max-width:800px){:root{--start-piece-offset:17px}.hero-start.hero-flamingo,.hero-start.hero-robot{transform:translate(-50%,-50%) scale(.55)}}
+
+/* Children see and enter all word-task letters in uppercase. */
+.challenge-modal .challenge input:not([inputmode="numeric"]){text-transform:uppercase}
