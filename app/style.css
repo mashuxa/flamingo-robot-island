@@ -149,3 +149,12 @@
 @keyframes board-confetti-drop{0%{opacity:1;transform:translate(0,-25px) rotate(0)}90%{opacity:1}100%{opacity:0;transform:translate(90px,110vh) rotate(1050deg)}}
 .stone .hero-flamingo{pointer-events:auto}
 @media(max-width:800px){.start-finish-zone{width:55px;height:49px;border-width:3px;font-size:10px}.finish-hero.hero-robot{width:42px;height:68px}}
+
+/* Equal visual character height on stones, at start, at finish and while moving. */
+:root{--piece-height:clamp(58px,7vw,84px)}
+.stone .hero-flamingo,.hero-start.hero-flamingo,.finish-hero.hero-flamingo{font-size:var(--piece-height);line-height:1;height:var(--piece-height);width:var(--piece-height);display:flex;align-items:center;justify-content:center}
+.stone .hero-robot,.hero-start.hero-robot,.finish-hero.hero-robot,.bot-moving-piece{height:var(--piece-height);width:calc(var(--piece-height) * .62)}
+.hero-start.hero-flamingo{left:4%;top:23%;bottom:auto;transform:translate(-50%,-100%)}
+.hero-start.hero-robot{left:4%;top:23%;bottom:auto;transform:translate(-50%,-100%)}
+.finish-hero.hero-flamingo,.finish-hero.hero-robot{transform:translate(-50%,-100%);top:85%;bottom:auto}
+@media(max-width:800px){:root{--piece-height:58px}}
