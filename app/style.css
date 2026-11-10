@@ -19,3 +19,9 @@
 .pip-6-2{top:50%;left:17%;transform:translateY(-50%)}
 .pip-6-3{top:50%;right:17%;transform:translateY(-50%)}
 @media(max-width:800px){.die{width:90px;height:90px}}
+
+/* Pointer-driven character dragging with a floating preview */
+.hero{touch-action:none;user-select:none;-webkit-user-select:none;cursor:grab;z-index:2}
+.hero:active{cursor:grabbing}
+.hero-origin-dragging{opacity:.25}
+.hero-drag-overlay{position:fixed;z-index:100;transform:translate(-50%,-65%) scale(1.25);font-size:clamp(42px,5vw,70px);filter:drop-shadow(0 15px 9px #2345);pointer-events:none;user-select:none;line-height:1}
