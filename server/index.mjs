@@ -3,6 +3,8 @@ import {randomInt} from "node:crypto";
 import {readFileSync,writeFileSync,renameSync,mkdirSync} from "node:fs";
 import {dirname} from "node:path";
 const words=JSON.parse(readFileSync(new URL("../data/words.json",import.meta.url),"utf8"));
+const AVATARS=["flamingo","robot","fox","unicorn","dino","cat"];
+const safeName=value=>String(value||"").trim().slice(0,24)||"Игрок";
 const defaults={language:"ru",maxLetters:4,addition:true,subtraction:true,mathMax:10};
 const pick=arr=>arr[randomInt(arr.length)];
 function challenge(type,settings){const groups=words[settings.language]||words.ru;const candidates=Object.entries(groups).filter(([len])=>Number(len)<=settings.maxLetters).flatMap(([,v])=>v);const word=pick(candidates);if(type==="word")return {type,prompt:"Напиши слово: "+word.toUpperCase(),answer:word};if(type==="letter"){const letter=pick(Array.from(word));const other=[...new Set(candidates.join(""))].filter(c=>c!==letter);const options=[letter,...other.sort(()=>randomInt(3)-1).slice(0,3)].sort(()=>randomInt(3)-1);return {type,prompt:"Нажми букву "+letter.toUpperCase(),answer:letter,options}}const max=settings.mathMax;const minus=settings.subtraction&&(!settings.addition||randomInt(2)===0);const a=randomInt(max+1),b=randomInt((minus?a:max-a)+1);return {type,prompt:a+(minus?" − ":" + ")+b+" = ?",answer:String(minus?a-b:a+b)}}
@@ -42,7 +44,7 @@ const cleanupInterval=setInterval(expireRooms,60*1000);
 cleanupInterval.unref();
 const send=(ws,obj)=>{if(ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(obj))};
 function publish(room){persistRooms();for(const ws of room.clients)send(ws,{type:"state",room:room.code,players:room.clients.size,state:room.state,seat:ws.seat})}
-function fresh(settings=defaults){const indexes=Array.from({length:60},(_,i)=>i);for(let i=indexes.length-1;i>0;i--){const j=randomInt(i+1);[indexes[i],indexes[j]]=[indexes[j],indexes[i]]}const board={};indexes.slice(0,27).forEach((n,i)=>board[n]=["letter","word","math"][i%3]);return {pos:[-1,-1],turn:0,die:null,stepsLeft:0,won:false,winner:null,board,challenge:null,coconuts:[0,0,0],settings,message:"Брось кубик!"}}
+function fresh(settings=defaults){const indexes=Array.from({length:60},(_,i)=>i);for(let i=indexes.length-1;i>0;i--){const j=randomInt(i+1);[indexes[i],indexes[j]]=[indexes[j],indexes[i]]}const board={};indexes.slice(0,27).forEach((n,i)=>board[n]=["letter","word","math"][i%3]);return {pos:[-1,-1],turn:0,die:null,stepsLeft:0,won:false,winner:null,board,challenge:null,coconuts:[0,0,0],players:[null,null],settings,message:"Брось кубик!"}}
 function code(){let n;do{n=String(randomInt(100000,1000000))}while(rooms.has(n));return n}
 wss.on("connection",ws=>{
  ws.on("message",raw=>{let data;try{data=JSON.parse(raw)}catch{return}
@@ -53,8 +55,15 @@ wss.on("connection",ws=>{
    let room=rooms.get(number);
    if(!room){if(data.type==="join")return send(ws,{type:"error",message:"Комната не найдена"});room={code:number,createdAt:Date.now(),clients:new Set(),state:fresh({...defaults,...data.settings})};rooms.set(number,room);persistRooms()}
    if(room.clients.size>=2)return send(ws,{type:"error",message:"Комната заполнена"});
+   if(!Array.isArray(room.state.players))room.state.players=[null,null];
+   const seat=[0,1].find(n=>![...room.clients].some(client=>client.seat===n));
+   const requested=AVATARS.includes(data.avatar)?data.avatar:(seat===0?"flamingo":"robot");
+   const other=room.state.players[1-seat]?.avatar;
+   if(other===requested)return send(ws,{type:"error",message:"Этот персонаж уже занят. Выбери другого."});
+   if(room.state.players[seat]?.avatar&&room.state.players[seat].avatar!==requested&&room.state.players[1-seat]?.avatar===requested)return send(ws,{type:"error",message:"Персонаж занят"});
+   room.state.players[seat]={name:safeName(data.name),avatar:requested};
    if(ws.room)return send(ws,{type:"error",message:"Вы уже в комнате"});
-   ws.room=room;ws.seat=[0,1].find(seat=>![...room.clients].some(client=>client.seat===seat));room.clients.add(ws);publish(room);return;
+   ws.room=room;ws.seat=seat;room.clients.add(ws);publish(room);return;
   }
   const room=ws.room;if(!room)return;
   const state=room.state;
@@ -87,7 +96,7 @@ wss.on("connection",ws=>{
   }
   if(data.type==="answer"&&state.turn===ws.seat&&state.challenge){if(String(data.answer||"").trim().toLocaleLowerCase()===state.challenge.answer.toLocaleLowerCase()){state.challenge=null;state.message="Молодец! Ты правильно решил задачу и получаешь дополнительный ход. Ходи ещё раз!";publish(room)}else send(ws,{type:"error",message:"Попробуй ещё раз!"})}
   if(data.type==="skip"&&state.turn===ws.seat&&state.challenge){state.challenge=null;state.turn=1-state.turn;state.message="Задание пропущено. Ход другого игрока.";publish(room)}
-  if(data.type==="reset"&&ws.seat===0){room.state=fresh(state.settings);publish(room)}
+  if(data.type==="reset"&&ws.seat===0){const players=state.players;room.state=fresh(state.settings);room.state.players=players;publish(room)}
  });
  ws.on("close",()=>{const room=ws.room;if(!room)return;room.clients.delete(ws);publish(room)});
 });
