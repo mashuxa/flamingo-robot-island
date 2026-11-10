@@ -11,7 +11,7 @@ type Settings={language:Language;maxLetters:number;addition:boolean;subtraction:
 type Challenge={type:"letter"|"word"|"math";prompt:string;answer:string;options?:string[]};
 const DEFAULT_SETTINGS:Settings={language:"ru",maxLetters:4,addition:true,subtraction:true,mathMax:10};
 const SETTINGS_KEY="flamingo-robot-island:task-settings";
-function createBoard(){const indexes=Array.from({length:TOTAL-1},(_,i)=>i).sort(()=>Math.random()-.5);const board:Record<number,"letter"|"word"|"math">={};indexes.slice(0,Math.floor(TOTAL*.45)).forEach((i,n)=>{board[i]=(["letter","word","math"] as const)[n%3]});return board}
+function createBoard(){const indexes=Array.from({length:TOTAL-1},(_,i)=>i);for(let i=indexes.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[indexes[i],indexes[j]]=[indexes[j],indexes[i]]}const board:Record<number,"letter"|"word"|"math">={};indexes.slice(0,Math.floor(TOTAL*.45)).forEach((i,n)=>{board[i]=(["letter","word","math"] as const)[n%3]});return board}
 function createChallenge(type:"letter"|"word"|"math",settings:Settings):Challenge{
  const pick=<T,>(items:T[])=>items[Math.floor(Math.random()*items.length)];
  const groups=words[settings.language] as Record<string,string[]>;
@@ -82,7 +82,7 @@ export default function Home(){
    if(data.type==="state"){
     setRoomError("");setRoom(data.room);setOnlineSeat(data.seat);setOnlinePlayers(data.players);
     setPos(data.state.pos);setTurn(data.state.turn);setDie(data.state.die);
-    setStepsLeft(data.state.stepsLeft);setWon(data.state.won);setMessage(data.state.message);
+    setStepsLeft(data.state.stepsLeft);setWon(data.state.won);setMessage(data.state.message);if(data.state.board)setBoard(data.state.board);setWinner(data.state.winner??null);
    }
   }catch{}};
   ws.onerror=()=>setRoomError("Не удалось подключиться к серверу");
